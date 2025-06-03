@@ -112,6 +112,13 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 This repository now contains early scaffolding for a near real-time research agent that analyzes Binance spot pairs together with social sentiment. The architecture stores market candles and indicators in TimescaleDB, embeds signal rationales into Qdrant, and ranks trade ideas using Google's Gemini models.
 
+The preview uses a simplified Dockerfile that just installs the Python
+dependencies and runs `uvicorn`. It no longer relies on the
+`langgraph-api` base image from earlier revisions. LangGraph is still a
+Python dependency and the agent's nodes live under `backend/graph/`. If
+you need the original `langgraph-api` setup with UV, check commit
+`fddf107` in the git history.
+
 The backend code under `backend/` defines FastAPI endpoints, LangGraph nodes for data ingestion and indicator computation, and a scheduler that runs once per minute. A sample `docker-compose.yml` spins up TimescaleDB, Qdrant, and the backend service.
 
 These components are still incomplete but follow the plan described in `docs/crypto_trading_research_plan.md`.
