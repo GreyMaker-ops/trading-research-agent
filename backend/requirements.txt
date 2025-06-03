@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+ccxt
+pandas-ta
+pandas
+asyncio
+aiohttp
+websockets
+SQLAlchemy
+asyncpg
+qdrant-client
+google-generativeai
+apscheduler
+langgraph
