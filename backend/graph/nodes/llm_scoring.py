@@ -9,9 +9,9 @@ from datetime import UTC, datetime
 from typing import List, Sequence
 from uuid import UUID, uuid4
 
+import backend.embeddings.qdrant_client as qc
 import google.generativeai as gen
 import pandas as pd
-from backend.embeddings.qdrant_client import get_client
 from qdrant_client.http import models as qmodels
 
 
@@ -65,7 +65,7 @@ async def score_signals(indicator_batch: pd.DataFrame) -> List[SignalCandidate]:
     except json.JSONDecodeError:
         return []
 
-    client = get_client()
+    client = qc.get_client()
     await _ensure_collection(client)
     results: List[SignalCandidate] = []
     for item in data:

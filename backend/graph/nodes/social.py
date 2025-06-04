@@ -22,13 +22,12 @@ class SocialMetrics:
 async def _fetch_tweets(pair: str, session: aiohttp.ClientSession) -> List[str]:
     """Fetch recent tweets mentioning the given pair."""
     token = os.getenv("TWITTER_BEARER_TOKEN", "")
-    if not token:
-        return []
     symbol = pair.split("/")[0]
     url = "https://api.twitter.com/2/tweets/search/recent"
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
     params = {"query": symbol, "max_results": "50"}
-    async with session.get(url, headers=headers, params=params) as resp:
+    resp = await session.get(url, headers=headers, params=params)
+    async with resp:
         if resp.status != 200:
             return []
         data = await resp.json()
@@ -38,12 +37,13 @@ async def _fetch_tweets(pair: str, session: aiohttp.ClientSession) -> List[str]:
 async def _fetch_news(pair: str, session: aiohttp.ClientSession) -> List[dict]:
     """Fetch recent CryptoPanic news for the pair."""
     token = os.getenv("CRYPTOPANIC_TOKEN", "")
-    if not token:
-        return []
     symbol = pair.split("/")[0].lower()
     url = "https://cryptopanic.com/api/v1/posts/"
-    params = {"auth_token": token, "currencies": symbol}
-    async with session.get(url, params=params) as resp:
+    params = {"currencies": symbol}
+    if token:
+        params["auth_token"] = token
+    resp = await session.get(url, params=params)
+    async with resp:
         if resp.status != 200:
             return []
         data = await resp.json()
