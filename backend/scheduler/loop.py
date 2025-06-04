@@ -4,30 +4,32 @@ import asyncio
 import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import pandas as pd
 from backend.graph.nodes.ingestion import PAIRS, fetch_candles
+from backend.graph.nodes.indicators import compute_indicators
+from backend.graph.nodes.llm_scoring import score_signals
+from backend.graph.nodes.evaluation import evaluate_signals
+from backend.db.persistence import save_candles, save_indicators, save_signals
 
 logger = logging.getLogger(__name__)
 
 
 async def run_cycle() -> None:
-    """Fetch candles for all pairs and log the results."""
+    """Run one ingestion/scoring cycle."""
     candles = await fetch_candles(PAIRS)
-    for candle in candles:
-        logger.info(
-            "%s %s o=%s h=%s l=%s c=%s v=%s",
-            candle.ts.isoformat(),
-            candle.pair,
-            candle.open,
-            candle.high,
-            candle.low,
-            candle.close,
-            candle.volume,
-        )
+    if not candles:
+        return
+    await save_candles(candles)
+    df = pd.DataFrame([c.__dict__ for c in candles])
+    indicators = compute_indicators(df)
+    await save_indicators(indicators)
+    signals = await score_signals(indicators)
+    await save_signals(signals)
 
 
 async def check_hits() -> None:
-    """Evaluate unresolved signals (placeholder)."""
-    return None
+    """Evaluate unresolved signals."""
+    await evaluate_signals()
 
 
 def start() -> None:
