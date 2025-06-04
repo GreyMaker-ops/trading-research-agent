@@ -1,6 +1,13 @@
 """Technical indicator computation."""
 
 import pandas as pd
+import numpy as np
+
+# pandas-ta expects numpy.NaN to exist, but this constant was removed in newer
+# numpy versions. Add it back for compatibility if missing.
+if not hasattr(np, "NaN"):
+    np.NaN = np.nan  # type: ignore[attr-defined]
+
 import pandas_ta as ta
 
 
