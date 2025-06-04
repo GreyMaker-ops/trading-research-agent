@@ -7,6 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import pandas as pd
 from backend.graph.nodes.ingestion import PAIRS, fetch_candles
 from backend.graph.nodes.indicators import compute_indicators
+from backend.graph.nodes.social import fetch_social_metrics
 from backend.graph.nodes.llm_scoring import score_signals
 from backend.graph.nodes.evaluation import evaluate_signals
 from backend.db.persistence import save_candles, save_indicators, save_signals
@@ -21,7 +22,8 @@ async def run_cycle() -> None:
         return
     await save_candles(candles)
     df = pd.DataFrame([c.__dict__ for c in candles])
-    indicators = compute_indicators(df)
+    sentiment = await fetch_social_metrics(PAIRS)
+    indicators = compute_indicators(df, sentiment)
     await save_indicators(indicators)
     signals = await score_signals(indicators)
     await save_signals(signals)
